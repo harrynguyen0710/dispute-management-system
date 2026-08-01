@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { type CaseOutcome, type CaseStatus } from '../Model';
 import { logger } from '../logging/logger';
+import type { CaseOutcome, CaseStatus } from '../models/Case';
 import { loadStore, saveStore } from './store';
 
 type CaseCsvRow = {

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { getDataStorePath } from '../config/env';
-import type { EmbeddedStore } from '../Model';
+import type { EmbeddedStore } from '../models/Case';
 
 const DEFAULT_STORE: EmbeddedStore = {
   cases: [],

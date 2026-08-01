@@ -11,7 +11,7 @@
     "data:seed": "tsx src/data/seed.ts",
     "data:setup": "npm run data:init && npm run data:seed",
     "lint": "echo \"Add linting for backend\"",
-    "test": "echo \"Add tests for backend\""
+    "test": "node --import tsx --test tests/repositories/cases.repository.test.ts"
   },
   "dependencies": {
     "express": "^4.21.2",
