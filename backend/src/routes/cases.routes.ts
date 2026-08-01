@@ -10,6 +10,7 @@ export function createCasesRouter(casesController?: CasesController) {
   const controller = casesController ?? new CasesController(service);
 
   router.get('/', controller.getCases);
+  router.get('/trends', controller.getTrends);
   router.patch('/:case_id/outcome', controller.updateCaseOutcome);
 
   return router;

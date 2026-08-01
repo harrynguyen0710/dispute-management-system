@@ -4,6 +4,7 @@ import type {
   UpdateOutcomeRequestDto,
   UpdateOutcomeResponseDto,
 } from '../dtos/cases.dto';
+import type { CasesTrendsResponseDto, OutcomeCounts } from '../dtos/trends.dto';
 import { NotFoundError } from '../errors/NotFoundError';
 import { ValidationError } from '../errors/ValidationError';
 import type { CaseAuditLog, CaseOutcome, CaseRecord } from '../models/Case';
@@ -80,6 +81,43 @@ export class CasesService {
         total,
         totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
       },
+    };
+  }
+
+  getTrends(): CasesTrendsResponseDto {
+    const casesWithLogs = this.casesRepository.findCases();
+
+    const by_region: Record<string, OutcomeCounts> = {};
+    const by_month: Record<string, OutcomeCounts> = {};
+
+    const initCounts = (): OutcomeCounts => ({
+      won: 0,
+      lost: 0,
+      fraud_confirmed: 0,
+      total: 0,
+    });
+
+    for (const { caseRecord } of casesWithLogs) {
+      const region = caseRecord.region || 'Unknown';
+      const month = caseRecord.created_at ? caseRecord.created_at.slice(0, 7) : 'Unknown';
+
+      if (!by_region[region]) by_region[region] = initCounts();
+      if (!by_month[month]) by_month[month] = initCounts();
+
+      by_region[region].total += 1;
+      if (caseRecord.outcome === 'won') by_region[region].won += 1;
+      if (caseRecord.outcome === 'lost') by_region[region].lost += 1;
+      if (caseRecord.outcome === 'fraud_confirmed') by_region[region].fraud_confirmed += 1;
+
+      by_month[month].total += 1;
+      if (caseRecord.outcome === 'won') by_month[month].won += 1;
+      if (caseRecord.outcome === 'lost') by_month[month].lost += 1;
+      if (caseRecord.outcome === 'fraud_confirmed') by_month[month].fraud_confirmed += 1;
+    }
+
+    return {
+      by_region,
+      by_month,
     };
   }
 

@@ -43,6 +43,15 @@ export class CasesController {
     }
   };
 
+  getTrends = async (request: Request, response: Response, next: NextFunction) => {
+    try {
+      const data = this.casesService.getTrends();
+      response.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   updateCaseOutcome = async (request: Request, response: Response, next: NextFunction) => {
     try {
       const caseId = request.params.case_id;
