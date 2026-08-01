@@ -11,6 +11,8 @@ coverage/
 .env
 .env.*
 !.env.example
+!.env.copy
+!env.copy
 
 # Logs
 *.log

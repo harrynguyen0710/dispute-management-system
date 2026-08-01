@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { createApp } from './app';
 import { getPort } from './config/env';
 import { logger } from './logging/logger';
