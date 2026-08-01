@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts,json --exec \"tsx src/server.ts\"",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "lint": "echo \"Add linting for backend\"",
+    "test": "echo \"Add tests for backend\""
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "pino": "^9.7.0",
+    "pino-http": "^10.4.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.7",
+    "nodemon": "^3.1.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
