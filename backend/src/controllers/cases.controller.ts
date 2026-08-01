@@ -11,12 +11,28 @@ export class CasesController {
   getCases = async (request: Request, response: Response, next: NextFunction) => {
     try {
       const search = normalizeQueryValue(request.query.search);
+      const userId = normalizeQueryValue(request.query.user_id ?? request.query.userId);
+      const deviceId = normalizeQueryValue(request.query.device_id ?? request.query.deviceId);
+      const userEmail = normalizeQueryValue(request.query.user_email ?? request.query.userEmail);
+
       const page = normalizePositiveInteger(request.query.page) ?? 1;
       const pageSize = normalizePositiveInteger(
         request.query.pageSize ?? request.query.page_size ?? request.query.perPage,
       ) ?? 20;
 
-      const data = this.casesService.listCases(search, {
+      let query: string | { user_id?: string; user_email?: string; device_id?: string } | undefined = undefined;
+
+      if (userId || deviceId || userEmail) {
+        const q: { user_id?: string; user_email?: string; device_id?: string } = {};
+        if (userId) q.user_id = userId;
+        if (userEmail) q.user_email = userEmail;
+        if (deviceId) q.device_id = deviceId;
+        query = q;
+      } else {
+        query = search;
+      }
+
+      const data = this.casesService.listCases(query, {
         page,
         pageSize,
       });

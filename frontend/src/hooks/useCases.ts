@@ -20,7 +20,10 @@ export function useCases() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const [userId, setUserId] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [deviceId, setDeviceId] = useState('');
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -32,7 +35,9 @@ export function useCases() {
         params: {
           page,
           pageSize,
-          search: search.trim() || undefined,
+          user_id: userId.trim() || undefined,
+          user_email: userEmail.trim() || undefined,
+          device_id: deviceId.trim() || undefined,
         },
       });
 
@@ -44,7 +49,7 @@ export function useCases() {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, search]);
+  }, [page, pageSize, userId, userEmail, deviceId]);
 
   useEffect(() => {
     fetchCases();
@@ -81,10 +86,20 @@ export function useCases() {
     pagination,
     loading,
     error,
-    search,
-    setSearch: (q: string) => {
-      setSearch(q);
-      setPage(1); // Reset to page 1 on new search
+    userId,
+    setUserId: (val: string) => {
+      setUserId(val);
+      setPage(1);
+    },
+    userEmail,
+    setUserEmail: (val: string) => {
+      setUserEmail(val);
+      setPage(1);
+    },
+    deviceId,
+    setDeviceId: (val: string) => {
+      setDeviceId(val);
+      setPage(1);
     },
     page,
     setPage,

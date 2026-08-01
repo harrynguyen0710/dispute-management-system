@@ -1,66 +1,111 @@
 import React, { useState, useEffect } from 'react';
 
 interface CasesFiltersProps {
-  search: string;
-  onSearchChange: (value: string) => void;
+  userId: string;
+  onUserIdChange: (val: string) => void;
+  userEmail: string;
+  onUserEmailChange: (val: string) => void;
+  deviceId: string;
+  onDeviceIdChange: (val: string) => void;
   loading?: boolean;
 }
 
-export function CasesFilters({ search, onSearchChange, loading }: CasesFiltersProps) {
-  const [localSearch, setLocalSearch] = useState(search);
+export function CasesFilters({
+  userId,
+  onUserIdChange,
+  userEmail,
+  onUserEmailChange,
+  deviceId,
+  onDeviceIdChange,
+  loading,
+}: CasesFiltersProps) {
+  const [localUserId, setLocalUserId] = useState(userId);
+  const [localUserEmail, setLocalUserEmail] = useState(userEmail);
+  const [localDeviceId, setLocalDeviceId] = useState(deviceId);
 
-  // Sync state if search prop changes
   useEffect(() => {
-    setLocalSearch(search);
-  }, [search]);
+    setLocalUserId(userId);
+  }, [userId]);
+
+  useEffect(() => {
+    setLocalUserEmail(userEmail);
+  }, [userEmail]);
+
+  useEffect(() => {
+    setLocalDeviceId(deviceId);
+  }, [deviceId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearchChange(localSearch);
+    onUserIdChange(localUserId);
+    onUserEmailChange(localUserEmail);
+    onDeviceIdChange(localDeviceId);
   };
 
-  const handleClear = () => {
-    setLocalSearch('');
-    onSearchChange('');
+  const handleReset = () => {
+    setLocalUserId('');
+    setLocalUserEmail('');
+    setLocalDeviceId('');
+    onUserIdChange('');
+    onUserEmailChange('');
+    onDeviceIdChange('');
   };
+
+  const hasAnyFilter = localUserId || localUserEmail || localDeviceId;
 
   return (
-    <form className="filters-form" onSubmit={handleSubmit}>
-      <div className="search-input-wrapper">
-        <svg
-          className="search-icon"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
+    <form className="filters-form-grid" onSubmit={handleSubmit}>
+      <div className="filter-field">
+        <label htmlFor="filter-user-id">User ID</label>
         <input
+          id="filter-user-id"
           type="text"
-          placeholder="Search by User ID, Email, or Device ID..."
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
+          placeholder="Filter by User ID..."
+          value={localUserId}
+          onChange={(e) => setLocalUserId(e.target.value)}
           className="search-input"
         />
-        {localSearch && (
+      </div>
+
+      <div className="filter-field">
+        <label htmlFor="filter-user-email">Email Address</label>
+        <input
+          id="filter-user-email"
+          type="text"
+          placeholder="Filter by Email..."
+          value={localUserEmail}
+          onChange={(e) => setLocalUserEmail(e.target.value)}
+          className="search-input"
+        />
+      </div>
+
+      <div className="filter-field">
+        <label htmlFor="filter-device-id">Device ID</label>
+        <input
+          id="filter-device-id"
+          type="text"
+          placeholder="Filter by Device ID..."
+          value={localDeviceId}
+          onChange={(e) => setLocalDeviceId(e.target.value)}
+          className="search-input"
+        />
+      </div>
+
+      <div className="filter-actions">
+        <button type="submit" className="search-submit-btn" disabled={loading}>
+          {loading ? 'Filtering...' : 'Apply Filters'}
+        </button>
+        {hasAnyFilter && (
           <button
             type="button"
-            onClick={handleClear}
-            className="clear-button"
-            title="Clear search"
+            onClick={handleReset}
+            className="btn btn-secondary reset-btn"
+            disabled={loading}
           >
-            &#x2715;
+            Reset
           </button>
         )}
       </div>
-      <button type="submit" className="search-submit-btn" disabled={loading}>
-        {loading ? 'Searching...' : 'Search'}
-      </button>
     </form>
   );
 }

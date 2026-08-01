@@ -184,9 +184,44 @@ code {
   background: var(--panel);
 }
 
-.filters-form {
+.filters-form-grid {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-field label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-field .search-input {
+  padding: 10px 12px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.reset-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  height: 41px;
+  box-sizing: border-box;
 }
 
 .search-input-wrapper {

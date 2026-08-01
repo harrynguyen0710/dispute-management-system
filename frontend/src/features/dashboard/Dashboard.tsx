@@ -12,8 +12,12 @@ export function Dashboard() {
     pagination,
     loading,
     error,
-    search,
-    setSearch,
+    userId,
+    setUserId,
+    userEmail,
+    setUserEmail,
+    deviceId,
+    setDeviceId,
     page,
     setPage,
     pageSize,
@@ -44,8 +48,12 @@ export function Dashboard() {
 
       <section className="control-panel">
         <CasesFilters
-          search={search}
-          onSearchChange={setSearch}
+          userId={userId}
+          onUserIdChange={setUserId}
+          userEmail={userEmail}
+          onUserEmailChange={setUserEmail}
+          deviceId={deviceId}
+          onDeviceIdChange={setDeviceId}
           loading={loading}
         />
       </section>

@@ -37,8 +37,24 @@ function toCaseResponseDto(caseRecord: CaseRecord, auditLogs: CaseAuditLog[]): C
 export class CasesService {
   constructor(private readonly casesRepository: CasesRepository) {}
 
-  listCases(searchQuery?: string, pagination?: CasesListPagination): CaseListResponseDto {
-    const normalizedSearchQuery = searchQuery?.trim().length ? searchQuery.trim() : undefined;
+  listCases(
+    searchQuery?: string | { user_id?: string; user_email?: string; device_id?: string },
+    pagination?: CasesListPagination,
+  ): CaseListResponseDto {
+    let normalizedQuery: any = undefined;
+    if (typeof searchQuery === 'string') {
+      normalizedQuery = searchQuery.trim().length ? searchQuery.trim() : undefined;
+    } else if (searchQuery) {
+      normalizedQuery = {
+        user_id: searchQuery.user_id?.trim() || undefined,
+        user_email: searchQuery.user_email?.trim() || undefined,
+        device_id: searchQuery.device_id?.trim() || undefined,
+      };
+      if (!normalizedQuery.user_id && !normalizedQuery.user_email && !normalizedQuery.device_id) {
+        normalizedQuery = undefined;
+      }
+    }
+
     const page = pagination?.page ?? 1;
     const pageSize = pagination?.pageSize ?? 20;
 
@@ -50,8 +66,8 @@ export class CasesService {
       throw new ValidationError('Page size must be a positive integer');
     }
 
-    const total = this.casesRepository.findCases(normalizedSearchQuery).length;
-    const records = this.casesRepository.findCases(normalizedSearchQuery, {
+    const total = this.casesRepository.findCases(normalizedQuery).length;
+    const records = this.casesRepository.findCases(normalizedQuery, {
       page,
       perPage: pageSize,
     });
