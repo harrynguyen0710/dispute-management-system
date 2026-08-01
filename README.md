@@ -2,31 +2,48 @@
 
 A reusable full-stack TypeScript workspace with a React frontend and a Node.js backend.
 
-## Structure
+## Project Structure
 
-- `frontend`: React + TypeScript frontend
-- `backend`: Node.js + TypeScript backend
+```text
+FraudSystem/
+├── frontend/    # React + TypeScript application
+└── backend/     # Node.js + TypeScript API
+```
 
 ## Prerequisites
 
-- Node.js 20+
-- npm 11+
+* Node.js 20+
+* npm 11+
 
-## Install
+## Getting Started
+
+### 1. Install Dependencies
+
+From the project root:
 
 ```bash
 npm install
 ```
 
-## Run
+### 2. Set Up Backend Data
 
-Start both apps from the workspace root:
+The backend uses an embedded JSON file store that is seeded from a CSV file.
+
+Initialize the data store and seed it with sample data:
+
+```bash
+npm run data:setup --workspace backend
+```
+
+### 3. Start the Project
+
+Run both the frontend and backend:
 
 ```bash
 npm run dev
 ```
 
-Run them individually:
+Or run them individually:
 
 ```bash
 npm run dev:frontend
@@ -50,5 +67,3 @@ npm run lint
 ```bash
 npm run test
 ```
-
-
