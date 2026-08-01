@@ -13,7 +13,7 @@ interface OutcomeModalProps {
 }
 
 export function OutcomeModal({ caseRecord, onClose, onSubmit }: OutcomeModalProps) {
-  const [outcome, setOutcome] = useState<CaseOutcome>('');
+  const [outcome, setOutcome] = useState<CaseOutcome>('won');
   const [outcomeNote, setOutcomeNote] = useState('');
   const [correctionReason, setCorrectionReason] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export function OutcomeModal({ caseRecord, onClose, onSubmit }: OutcomeModalProp
 
   useEffect(() => {
     if (caseRecord) {
-      setOutcome(caseRecord.outcome || '');
+      setOutcome(caseRecord.outcome || 'won');
       setOutcomeNote(caseRecord.outcome_note || '');
       setCorrectionReason('');
       setValidationError(null);
@@ -35,6 +35,11 @@ export function OutcomeModal({ caseRecord, onClose, onSubmit }: OutcomeModalProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
+
+    if (!outcome) {
+      setValidationError('Outcome is required.');
+      return;
+    }
 
     if (isCorrection && !correctionReason.trim()) {
       setValidationError('Correction reason is required when correcting a resolved outcome.');
