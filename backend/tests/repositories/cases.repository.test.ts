@@ -17,7 +17,7 @@ describe('CasesRepository', () => {
 
     const result = repository.findCases();
 
-    assert.deepEqual(result.map((caseRecord) => caseRecord.case_id), [
+    assert.deepEqual(result.map(({ caseRecord }) => caseRecord.case_id), [
       'CASE-10003',
       'CASE-10002',
       'CASE-10001',
@@ -29,7 +29,7 @@ describe('CasesRepository', () => {
 
     const result = repository.findCases('usr-1000');
 
-    assert.deepEqual(result.map((caseRecord) => caseRecord.case_id), ['CASE-10002', 'CASE-10001']);
+    assert.deepEqual(result.map(({ caseRecord }) => caseRecord.case_id), ['CASE-10002', 'CASE-10001']);
   });
 
   it('filters by email case-insensitively and by partial substrings', () => {
@@ -37,7 +37,7 @@ describe('CasesRepository', () => {
 
     const result = repository.findCases('Dakota');
 
-    assert.deepEqual(result.map((caseRecord) => caseRecord.case_id), ['CASE-10002']);
+    assert.deepEqual(result.map(({ caseRecord }) => caseRecord.case_id), ['CASE-10002']);
   });
 
   it('filters by device_id with partial matches', () => {
@@ -45,7 +45,7 @@ describe('CasesRepository', () => {
 
     const result = repository.findCases('8bab');
 
-    assert.deepEqual(result.map((caseRecord) => caseRecord.case_id), ['CASE-10002']);
+    assert.deepEqual(result.map(({ caseRecord }) => caseRecord.case_id), ['CASE-10002']);
   });
 
   it('returns an empty array when no matches are found', () => {

@@ -16,8 +16,7 @@ export type CasesListPagination = {
   pageSize: number;
 };
 
-
-function toCaseResponseDto(caseRecord: CaseRecord): CaseResponseDto {
+function toCaseResponseDto(caseRecord: CaseRecord, auditLogs: CaseAuditLog[]): CaseResponseDto {
   return {
     case_id: caseRecord.case_id,
     user_id: caseRecord.user_id,
@@ -31,15 +30,8 @@ function toCaseResponseDto(caseRecord: CaseRecord): CaseResponseDto {
     outcome: caseRecord.outcome,
     outcome_note: caseRecord.outcome_note,
     resolved_at: caseRecord.resolved_at,
+    audit_logs: auditLogs,
   };
-}
-
-function toCorrectionNote(originalNote: string | null, correctedAt: string, reason: string): string {
-  if (originalNote === null) {
-    return `[Corrected ${correctedAt.slice(0, 10)}]: ${reason}`;
-  }
-
-  return `${originalNote} | [Corrected ${correctedAt.slice(0, 10)}]: ${reason}`;
 }
 
 export class CasesService {
@@ -65,7 +57,7 @@ export class CasesService {
     });
 
     return {
-      data: records.map(toCaseResponseDto),
+      data: records.map(({ caseRecord, auditLogs }) => toCaseResponseDto(caseRecord, auditLogs)),
       pagination: {
         page,
         pageSize,
@@ -97,11 +89,7 @@ export class CasesService {
         throw new ValidationError('Correction reason is required');
       }
 
-      const correctedOutcomeNote = toCorrectionNote(
-        nextOutcomeNote ?? currentCase.outcome_note,
-        resolvedAt,
-        correctionReason,
-      );
+      const outcomeNoteVal = nextOutcomeNote ?? currentCase.outcome_note;
 
       const auditLog: Omit<CaseAuditLog, 'case_id' | 'log_id'> = {
         previous_outcome: currentCase.outcome,
@@ -115,7 +103,7 @@ export class CasesService {
         {
           status: 'resolved',
           outcome: payload.outcome,
-          outcome_note: correctedOutcomeNote,
+          outcome_note: outcomeNoteVal,
           resolved_at: currentCase.resolved_at,
         },
         auditLog,
@@ -128,12 +116,23 @@ export class CasesService {
       };
     }
 
-    this.casesRepository.saveOutcome(caseId, {
-      status: 'resolved',
-      outcome: payload.outcome,
-      outcome_note: nextOutcomeNote,
-      resolved_at: resolvedAt,
-    });
+    const auditLog: Omit<CaseAuditLog, 'case_id' | 'log_id'> = {
+      previous_outcome: null,
+      new_outcome: payload.outcome,
+      correction_reason: null,
+      changed_at: resolvedAt,
+    };
+
+    this.casesRepository.saveOutcome(
+      caseId,
+      {
+        status: 'resolved',
+        outcome: payload.outcome,
+        outcome_note: nextOutcomeNote,
+        resolved_at: resolvedAt,
+      },
+      auditLog,
+    );
 
     return {
       success: true,

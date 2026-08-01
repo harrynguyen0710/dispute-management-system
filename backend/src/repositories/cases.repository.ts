@@ -26,69 +26,86 @@ export type FindOptions = {
 };
 
 
+export type CaseWithAuditLogs = {
+  caseRecord: CaseRecord;
+  auditLogs: CaseAuditLog[];
+};
+
 export class CasesRepository {
   constructor(
     private readonly store: EmbeddedStore = loadStore(),
     private readonly persist: (store: EmbeddedStore) => void = saveStore,
   ) {}
 
-  findCases(query?: CasesSearchQuery, opts?: FindOptions): CaseRecord[] {
+  findCases(query?: CasesSearchQuery, opts?: FindOptions): CaseWithAuditLogs[] {
     const records = [...this.store.cases].sort((left, right) =>
       right.created_at.localeCompare(left.created_at),
     );
 
+    let resultRecords: CaseRecord[] = [];
+
     if (query === undefined || query === '') {
-      if (!opts) return records;
-      const { limit, offset, page, perPage } = opts;
-      if (limit !== undefined) {
-        const start = offset ?? 0;
-        return records.slice(start, start + limit);
+      if (!opts) {
+        resultRecords = records;
+      } else {
+        const { limit, offset, page, perPage } = opts;
+        if (limit !== undefined) {
+          const start = offset ?? 0;
+          resultRecords = records.slice(start, start + limit);
+        } else if (page !== undefined || perPage !== undefined || opts.offset !== undefined) {
+          const pg = Math.max(1, page ?? 1);
+          const pp = perPage ?? 20;
+          const start = opts.offset ?? (pg - 1) * pp;
+          resultRecords = records.slice(start, start + pp);
+        } else {
+          resultRecords = records;
+        }
       }
-      if (page !== undefined || perPage !== undefined || opts.offset !== undefined) {
-        const pg = Math.max(1, page ?? 1);
-        const pp = perPage ?? 20;
-        const start = opts.offset ?? (pg - 1) * pp;
-        return records.slice(start, start + pp);
-      }
-      return records;
-    }
-
-    let filtered = records;
-    if (typeof query === 'string') {
-      filtered = records.filter(
-        (caseRecord) =>
-          matchesPartial(caseRecord.case_id, query) ||
-          matchesPartial(caseRecord.user_id, query) ||
-          matchesPartial(caseRecord.user_email, query) ||
-          matchesPartial(caseRecord.device_id, query),
-      );
     } else {
-      filtered = records.filter((caseRecord) => {
-        const userIdMatches =
-          query.user_id === undefined || matchesPartial(caseRecord.user_id, query.user_id);
-        const userEmailMatches =
-          query.user_email === undefined || matchesPartial(caseRecord.user_email, query.user_email);
-        const deviceIdMatches =
-          query.device_id === undefined || matchesPartial(caseRecord.device_id, query.device_id);
+      let filtered = records;
+      if (typeof query === 'string') {
+        filtered = records.filter(
+          (caseRecord) =>
+            matchesPartial(caseRecord.case_id, query) ||
+            matchesPartial(caseRecord.user_id, query) ||
+            matchesPartial(caseRecord.user_email, query) ||
+            matchesPartial(caseRecord.device_id, query),
+        );
+      } else {
+        filtered = records.filter((caseRecord) => {
+          const userIdMatches =
+            query.user_id === undefined || matchesPartial(caseRecord.user_id, query.user_id);
+          const userEmailMatches =
+            query.user_email === undefined || matchesPartial(caseRecord.user_email, query.user_email);
+          const deviceIdMatches =
+            query.device_id === undefined || matchesPartial(caseRecord.device_id, query.device_id);
 
-        return userIdMatches && userEmailMatches && deviceIdMatches;
-      });
+          return userIdMatches && userEmailMatches && deviceIdMatches;
+        });
+      }
+
+      if (!opts) {
+        resultRecords = filtered;
+      } else {
+        const { limit, offset, page, perPage } = opts;
+        if (limit !== undefined) {
+          const start = offset ?? 0;
+          resultRecords = filtered.slice(start, start + limit);
+        } else if (page !== undefined || perPage !== undefined || opts.offset !== undefined) {
+          const pg = Math.max(1, page ?? 1);
+          const pp = perPage ?? 20;
+          const start = opts.offset ?? (pg - 1) * pp;
+          resultRecords = filtered.slice(start, start + pp);
+        } else {
+          resultRecords = filtered;
+        }
+      }
     }
 
-    if (!opts) return filtered;
-    const { limit, offset, page, perPage } = opts;
-    if (limit !== undefined) {
-      const start = offset ?? 0;
-      return filtered.slice(start, start + limit);
-    }
-    if (page !== undefined || perPage !== undefined || opts.offset !== undefined) {
-      const pg = Math.max(1, page ?? 1);
-      const pp = perPage ?? 20;
-      const start = opts.offset ?? (pg - 1) * pp;
-      return filtered.slice(start, start + pp);
-    }
-
-    return filtered;
+    return resultRecords.map((caseRecord) => ({
+      caseRecord,
+      auditLogs: this.store.case_audit_logs.filter((log) => log.case_id === caseRecord.case_id),
+    }));
   }
 
   findById(caseId: string): CaseRecord | undefined {

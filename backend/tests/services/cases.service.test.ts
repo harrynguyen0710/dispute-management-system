@@ -47,7 +47,7 @@ describe('CasesService', () => {
   });
 
   it('resolves an open case', () => {
-    const { service, repository } = createService();
+    const { service, repository, store } = createService();
 
     const result = service.updateOutcome('CASE-10001', {
       outcome: 'fraud_confirmed',
@@ -65,6 +65,11 @@ describe('CasesService', () => {
     assert.equal(updatedCase?.outcome, 'fraud_confirmed');
     assert.equal(updatedCase?.outcome_note, 'Manual review completed.');
     assert.match(updatedCase?.resolved_at ?? '', /^\d{4}-\d{2}-\d{2}T/);
+
+    assert.equal(store.case_audit_logs.length, 2);
+    assert.equal(store.case_audit_logs[1]?.case_id, 'CASE-10001');
+    assert.equal(store.case_audit_logs[1]?.previous_outcome, null);
+    assert.equal(store.case_audit_logs[1]?.new_outcome, 'fraud_confirmed');
   });
 
   it('records a correction without changing resolved_at', () => {
@@ -88,7 +93,7 @@ describe('CasesService', () => {
     assert.equal(store.case_audit_logs[1]?.previous_outcome, 'won');
     assert.equal(store.case_audit_logs[1]?.new_outcome, 'fraud_confirmed');
     assert.equal(store.case_audit_logs[1]?.correction_reason, 'appeal_review');
-    assert.match(updatedCase?.outcome_note ?? '', /\[Corrected \d{4}-\d{2}-\d{2}\]: appeal_review$/);
+    assert.equal(updatedCase?.outcome_note, 'Reviewed and confirmed.');
   });
 
   it('requires a correction reason for resolved cases', () => {

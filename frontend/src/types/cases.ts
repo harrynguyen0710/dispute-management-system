@@ -1,4 +1,5 @@
-import type { CaseAuditLog, CaseOutcome, CaseStatus } from '../models/Case';
+export type CaseStatus = 'open' | 'resolved';
+export type CaseOutcome = 'won' | 'lost' | 'fraud_confirmed' | '';
 
 export interface UpdateOutcomeRequestDto {
   outcome: CaseOutcome;
@@ -10,6 +11,15 @@ export interface UpdateOutcomeResponseDto {
   success: boolean;
   message: string;
   is_correction: boolean;
+}
+
+export interface CaseAuditLog {
+  log_id: number;
+  case_id: string;
+  previous_outcome: CaseOutcome | null;
+  new_outcome: CaseOutcome | null;
+  correction_reason: string | null;
+  changed_at: string;
 }
 
 export interface CaseResponseDto {
@@ -39,3 +49,4 @@ export interface CaseListResponseDto {
   data: CaseResponseDto[];
   pagination: CaseListPaginationDto;
 }
+
