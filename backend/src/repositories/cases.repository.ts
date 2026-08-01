@@ -1,7 +1,6 @@
 import { loadStore, saveStore } from '../data/store';
-import type { UpdateOutcomeRequestDto } from '../dtos/cases.dto';
 import { NotFoundError } from '../errors/NotFoundError';
-import type { CaseAuditLog, CaseRecord, EmbeddedStore } from '../models/Case';
+import type { CaseAuditLog, CaseOutcome, CaseRecord, CaseStatus, EmbeddedStore } from '../models/Case';
 import { matchesPartial } from '../utils/stringUtils';
 
 export type CasesSearchQuery =
@@ -13,11 +12,17 @@ export type CasesSearchQuery =
     };
 
 export type CaseAuditLogInput = Omit<CaseAuditLog, 'case_id' | 'log_id'>;
+export type CaseOutcomeUpdate = {
+  status: CaseStatus;
+  outcome: CaseOutcome | null;
+  outcome_note: string | null;
+  resolved_at: string | null;
+};
 export type FindOptions = {
-  page?: number; 
+  page?: number;
   perPage?: number;
   limit?: number;
-  offset?: number; 
+  offset?: number;
 };
 
 
@@ -59,15 +64,15 @@ export class CasesRepository {
       );
     } else {
       filtered = records.filter((caseRecord) => {
-      const userIdMatches =
-        query.user_id === undefined || matchesPartial(caseRecord.user_id, query.user_id);
-      const userEmailMatches =
-        query.user_email === undefined || matchesPartial(caseRecord.user_email, query.user_email);
-      const deviceIdMatches =
-        query.device_id === undefined || matchesPartial(caseRecord.device_id, query.device_id);
+        const userIdMatches =
+          query.user_id === undefined || matchesPartial(caseRecord.user_id, query.user_id);
+        const userEmailMatches =
+          query.user_email === undefined || matchesPartial(caseRecord.user_email, query.user_email);
+        const deviceIdMatches =
+          query.device_id === undefined || matchesPartial(caseRecord.device_id, query.device_id);
 
-      return userIdMatches && userEmailMatches && deviceIdMatches;
-    });
+        return userIdMatches && userEmailMatches && deviceIdMatches;
+      });
     }
 
     if (!opts) return filtered;
@@ -84,7 +89,6 @@ export class CasesRepository {
     }
 
     return filtered;
-
   }
 
   findById(caseId: string): CaseRecord | undefined {
@@ -93,7 +97,7 @@ export class CasesRepository {
 
   saveOutcome(
     caseId: string,
-    update: UpdateOutcomeRequestDto,
+    update: CaseOutcomeUpdate,
     auditLog?: CaseAuditLogInput,
   ): CaseRecord {
     const caseIndex = this.store.cases.findIndex((caseRecord) => caseRecord.case_id === caseId);
